@@ -1,0 +1,79 @@
+/* Основные стили */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #0a0a1a;
+    color: #ffffff;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 50px;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.logo span {
+    color: #00ffff;
+}
+
+nav a {
+    margin-left: 20px;
+    text-decoration: none;
+    color: white;
+}
+
+.search-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.search-box {
+    margin: 30px 0;
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(20, 20, 40, 0.7);
+    position: relative;
+    overflow: hidden;
+}
+
+.search-box input {
+    width: calc(100% - 30px); /* Учитываем padding */
+    padding: 15px;
+    border-radius: 5px;
+    border: none;
+    font-size: 16px;
+    background: rgba(10, 10, 30, 0.9);
+    color: white;
+    border: 1px solid #00ffff;
+    box-shadow: 0 0 5px #00ffff;
+}
+
+.search-box input:focus {
+    outline: none;
+    box-shadow: 0 0 10px #00ffff;
+}
+
+#search-button {
+    margin-top: 15px;
+    width: 100%;
+}
+.neon-box {
+    border: 1px solid #00ffff;
+    box-shadow: 0 0 10px #00ffff, 0 0 20px rgba(0, 255, 255, 0.3) inset;
+    padding: 20px;
+    border-radius: 10px;
+}
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 50px;
+}

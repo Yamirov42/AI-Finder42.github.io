@@ -1,0 +1,74 @@
+/* эффекты */
+.neon-text {
+    text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 20px #00ffff;
+    color: #ffffff;
+}
+
+.neon-header {
+    border-bottom: 1px solid #00ffff;
+    box-shadow: 0 0 10px #00ffff;
+}
+
+.neon-footer {
+    border-top: 1px solid #00ffff;
+    box-shadow: 0 0 10px #00ffff inset;
+}
+
+.neon-button {
+    background: transparent;
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-shadow: 0 0 5px #00ffff;
+    box-shadow: 0 0 10px #00ffff;
+}
+
+.neon-button:hover {
+    background: #00ffff;
+    color: #0a0a1a;
+    box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff;
+}
+
+.neon-box {
+    border: 1px solid #00ffff;
+    box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff inset;
+}
+
+.neon-input {
+    background: rgba(10, 10, 30, 0.7);
+    border: 1px solid #00ffff;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #00ffff;
+}
+
+.neon-input:focus {
+    outline: none;
+    box-shadow: 0 0 10px #00ffff;
+}
+
+.neon-link {
+    color: #00ffff;
+    text-decoration: none;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.neon-link:hover {
+    text-decoration: underline;
+}
+
+.neon-background {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 100%);
+}
+
+.neuron-card:hover {
+    box-shadow: 0 0 15px #00ffff;
+    transform: translateY(-5px);
+    transition: all 0.3s;
+}
