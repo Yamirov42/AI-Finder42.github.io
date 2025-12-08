@@ -1,9 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // ----------------------------------------------------------------------
-    // I. КОНФИГУРАЦИЯ API И ФУНКЦИИ-ЗАГЛУШКИ
-    // ----------------------------------------------------------------------
-
-    // Базовый URL для имитации API
     const API_BASE_URL = 'http://api.neurofinder.local/v1';
 
     // Вспомогательная функция для имитации асинхронного запроса
@@ -18,8 +13,6 @@ document.addEventListener('DOMContentLoaded', function() {
             'ChatGPT': { name: "ChatGPT", category: "chat", price: "$20/месяц", link: "#", isFavorite: true },
             'MidJourney': { name: "MidJourney", category: "image generation", price: "$10/месяц", link: "#", isFavorite: false },
         };
-
-        // --- ИМИТАЦИЯ ТОЧЕК ВХОДА API ---
 
         if (url.startsWith(`${API_BASE_URL}/search`)) {
             // ИМИТАЦИЯ ПОИСКА: всегда возвращает статический список для демонстрации
@@ -46,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (url.startsWith(`${API_BASE_URL}/user/profile`) && isLoggedIn) {
-            // ИМИТАЦИЯ ПОЛУЧЕНИЯ ДАННЫХ ЛК (СЦЕНАРИЙ "Получение данных ЛК")
             return {
                 ok: true,
                 json: async () => ({
@@ -77,11 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return { ok: false, status: 404, json: async () => ({ error: 'Not Found or Unauthorized' }) };
     }
 
-
-    // ----------------------------------------------------------------------
-    // II. ФУНКЦИИ РЕНДЕРИНГА
-    // ----------------------------------------------------------------------
-
+    // ФУНКЦИИ РЕНДЕРИНГА
     function createNeuroCard(network) {
         const card = document.createElement('div');
         card.className = 'neuron-card';
@@ -98,10 +86,8 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
 
-        // Добавляем обработчик для кнопки избранного (СЦЕНАРИЙ "Добавление в Избранное")
         const favoriteButton = card.querySelector('.favorite-btn');
         if (favoriteButton) {
-             // Имитируем, что только авторизованные могут добавлять
             favoriteButton.onclick = async () => {
                 if (!localStorage.getItem('authToken')) {
                     alert('Для добавления в избранное необходимо войти!');
@@ -115,7 +101,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (response.ok) {
                     alert(`${favoriteButton.dataset.id} добавлен в избранное!`);
-                    // Визуальное обновление (имитация)
                     favoriteButton.textContent = 'В избранном';
                     favoriteButton.disabled = true;
                 } else {
@@ -146,10 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-    // ----------------------------------------------------------------------
-    // III. ЛОГИКА ГЛАВНОЙ СТРАНИЦЫ (index.html)
-    // ----------------------------------------------------------------------
+    // ЛОГИКА ГЛАВНОЙ СТРАНИЦЫ (index.html)
 
     function setupIndexPage() {
         const searchButton = document.getElementById('search-button');
@@ -163,14 +145,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     performSearch();
                 }
             });
-            renderAuthStatus(); // Обновляем шапку
+            renderAuthStatus(); 
         }
 
         async function performSearch() {
             const query = searchInput.value;
             resultsContainer.innerHTML = '<p class="neon-text">Идет поиск...</p>';
 
-            // ИМИТАЦИЯ ВЗАИМОДЕЙСТВИЯ С API (СЦЕНАРИЙ "Поиск нейросетей")
             try {
                 const response = await fetchMock(`${API_BASE_URL}/search?q=${query}`);
                 
@@ -197,21 +178,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-    // ----------------------------------------------------------------------
-    // IV. ЛОГИКА АВТОРИЗАЦИИ (login.html)
-    // ----------------------------------------------------------------------
+    // ЛОГИКА АВТОРИЗАЦИИ (login.html)
 
     function setupLoginPage() {
         const loginForm = document.getElementById('login-form');
-
         if (loginForm) {
             loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-
-                // ИМИТАЦИЯ ВЗАИМОДЕЙСТВИЯ С API (СЦЕНАРИЙ "Авторизация")
                 const response = await fetchMock(`${API_BASE_URL}/auth/login`, {
                     method: 'POST',
                     body: JSON.stringify({ email: email, password: password }),
@@ -231,23 +206,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-    // ----------------------------------------------------------------------
     // V. ЛОГИКА ЛИЧНОГО КАБИНЕТА (personal_account.html)
-    // ----------------------------------------------------------------------
 
     function setupPersonalAccountPage() {
         const paContainer = document.querySelector('.account-container');
         if (!paContainer) return;
-
-        // Проверка авторизации
         const token = localStorage.getItem('authToken');
         if (!token) {
             alert('Необходима авторизация!');
             window.location.href = 'login.html';
             return;
         }
-
         const logoutButton = document.getElementById('logout-button');
         if (logoutButton) {
             logoutButton.addEventListener('click', handleLogout);
@@ -258,8 +227,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (welcomeMessage && username) {
             welcomeMessage.textContent = `Добро пожаловать, ${username}!`;
         }
-        
-        // Переключение вкладок
         document.querySelectorAll('.tab-button').forEach(button => {
             button.addEventListener('click', function() {
                 document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
@@ -282,7 +249,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (el) el.innerHTML = '<p class="neon-text">Загрузка данных...</p>';
         });
         
-        // ИМИТАЦИЯ ВЗАИМОДЕЙСТВИЯ С API (СЦЕНАРИЙ "Получение данных ЛК")
         try {
             const response = await fetchMock(`${API_BASE_URL}/user/profile`, {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
@@ -294,7 +260,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const data = await response.json();
 
-            // 1. Рендеринг Избранных нейросетей
             if (favoritesList) {
                 favoritesList.innerHTML = '';
                 if (data.favorites && data.favorites.length) {
@@ -305,8 +270,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     favoritesList.innerHTML = '<p>Список избранного пуст.</p>';
                 }
             }
-            
-            // 2. Рендеринг Любимых категорий
             if (categoriesList) {
                 categoriesList.innerHTML = '';
                 if (data.favoriteCategories && data.favoriteCategories.length) {
@@ -324,7 +287,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
-            // 3. Рендеринг Истории поиска
             if (historyList) {
                 historyList.innerHTML = '';
                 if (data.searchHistory && data.searchHistory.length) {
@@ -347,10 +309,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-    // ----------------------------------------------------------------------
-    // VI. ГЛОБАЛЬНАЯ ЛОГИКА
-    // ----------------------------------------------------------------------
+    // ГЛОБАЛЬНАЯ ЛОГИКА
     
     function handleLogout() {
         localStorage.removeItem('authToken');
@@ -359,13 +318,11 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'index.html';
     }
 
-
-    // Определение текущей страницы
     const path = window.location.pathname;
     if (path.includes('personal_account.html')) {
         setupPersonalAccountPage();
     } else if (path.includes('login.html') || path.includes('register.html')) {
-        setupLoginPage(); // Логика регистрации остается в login.html для простоты
+        setupLoginPage(); 
     } else {
         setupIndexPage();
     }
