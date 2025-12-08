@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Finder42 | Поиск нейросетей</title>
+    <title>NeuroFinder | Поиск нейросетей</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/neon.css">
 </head>
 <body class="neon-background">
     <header class="neon-header">
-        <div class="logo">AI-<span>Finder42</span></div>
+        <div class="logo">Neuro<span>Finder</span></div>
         <nav>
-            <a href="login.html" class="neon-button">Вход</a>
-                    </nav>
+            <a href="login.html" id="auth-link" class="neon-button">Вход</a>
+            <a href="personal_account.html" id="personal-account-link" class="neon-button" style="display:none;">Личный кабинет</a>
+        </nav>
     </header>
 
     <main class="search-container">
@@ -24,12 +25,12 @@
         </div>
 
         <div class="results-container" id="results">
-            <!-- Результаты будут появляться здесь -->
+            <p class="neon-text">Используйте поиск, чтобы найти нейросети.</p>
         </div>
     </main>
 
     <footer class="neon-footer">
-        <p>© 2025 AI-Finder42.</p>
+        <p>© 2023 NeuroFinder. Все права защищены.</p>
     </footer>
 
     <script src="js/script.js"></script>
