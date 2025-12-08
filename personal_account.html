@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroFinder | Личный кабинет</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/neon.css">
+</head>
+<body class="neon-background">
+    <header class="neon-header">
+        <div class="logo">Neuro<span>Finder</span></div>
+        <nav>
+            <a href="index.html" class="neon-button">Главная</a>
+            <button id="logout-button" class="neon-button">Выход</button>
+        </nav>
+    </header>
+
+    <main class="account-container">
+        <h1 class="neon-text" id="welcome-message">Добро пожаловать, Пользователь!</h1>
+        
+        <div class="tabs-container neon-box">
+            <div class="tabs-header">
+                <button class="tab-button active neon-button" data-tab="favorites">Избранные нейросети</button>
+                <button class="tab-button neon-button" data-tab="categories">Любимые категории</button>
+                <button class="tab-button neon-button" data-tab="history">История поиска</button>
+            </div>
+
+            <div class="tab-content" id="favorites">
+                <h2 class="neon-text">Ваши избранные нейросети</h2>
+                <div id="favorites-list" class="results-list">
+                    </div>
+            </div>
+
+            <div class="tab-content hidden" id="categories">
+                <h2 class="neon-text">Ваши любимые категории</h2>
+                <div id="categories-list" class="results-list">
+                    </div>
+            </div>
+
+            <div class="tab-content hidden" id="history">
+                <h2 class="neon-text">Недавние запросы</h2>
+                <div id="history-list" class="results-list">
+                    </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="neon-footer">
+        <p>© 2023 NeuroFinder. Все права защищены.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
