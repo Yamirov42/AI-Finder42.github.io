@@ -1,10 +1,6 @@
 // js/script.js
 
 document.addEventListener('DOMContentLoaded', function() {
-    // =================================================================================
-    // ВАЖНО: ЗАМЕНИТЕ ЭТОТ АДРЕС НА ВАШ ПУБЛИЧНЫЙ URL, ПРЕДОСТАВЛЕННЫЙ RENDER!
-    // (Например: https://ai-finder-api-42.onrender.com/api/v1)
-    // =================================================================================
   const API_BASE_URL = 'https://ai-finder-api-du57.onrender.com/api/v1';
 
     // Функция для выполнения запросов к API
