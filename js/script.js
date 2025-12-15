@@ -1,174 +1,179 @@
 // js/script.js
 
 document.addEventListener('DOMContentLoaded', function() {
-  const API_BASE_URL = 'https://ai-finder-api-du57.onrender.com/api/v1';
+    
+    // =================================================================================
+    // ВАЖНО: ЗАМЕНИТЕ ЭТОТ АДРЕС НА ВАШ ПУБЛИЧНЫЙ URL, ПРЕДОСТАВЛЕННЫЙ RENDER!
+    // (Например: https://ai-finder-api-du57.onrender.com/api/v1)
+    // =================================================================================
+    const API_BASE_URL = 'https://ai-finder-api-du57.onrender.com/api/v1'; 
+    // ^^^ Убедитесь, что этот адрес правильный!
 
-    // Функция для выполнения запросов к API
+    // --- Утилитарная функция для API ---
     async function fetchData(endpoint, options = {}) {
         const url = `${API_BASE_URL}${endpoint}`;
         try {
             const response = await fetch(url, options);
             if (!response.ok) {
-                // Если статус 4xx или 5xx, выбрасываем ошибку с текстом ответа сервера
-                const errorData = await response.json();
+                const errorData = await response.json().catch(() => ({ error: 'Неизвестная ошибка сервера' }));
                 throw new Error(errorData.error || `Ошибка сети: ${response.status}`);
             }
-            // Для POST/PUT/DELETE, которые могут возвращать пустой ответ (204)
-            if (response.status === 204) return null; 
+            if (response.status === 204) return null;
             return await response.json();
         } catch (error) {
             console.error('Ошибка запроса к API:', error.message);
-            // Возвращаем ошибку для обработки в UI
             throw error; 
         }
     }
 
-    // --- Логика для главной страницы/поиска ---
+    // --- ГЛАВНАЯ СТРАНИЦА (ПОИСК И КАТЕГОРИИ) ---
     
     const searchForm = document.getElementById('search-form');
     const searchResults = document.getElementById('search-results');
     const categoryFilter = document.getElementById('category-filter');
     
-    // 1. Загрузка категорий при загрузке страницы
-    async function loadCategories() {
-        try {
-            const categories = await fetchData('/categories');
-            if (categoryFilter) {
-                // Добавляем опцию "Все категории"
-                categoryFilter.innerHTML = '<option value="">Все категории</option>'; 
-                categories.forEach(cat => {
-                    const option = document.createElement('option');
-                    option.value = cat.category_id;
-                    option.textContent = cat.category_name;
-                    categoryFilter.appendChild(option);
+    // Проверяем, что мы на главной странице (или странице с поиском)
+    if (searchForm || searchResults || categoryFilter) { 
+
+        async function loadCategories() {
+            try {
+                const categories = await fetchData('/categories');
+                if (categoryFilter) {
+                    categoryFilter.innerHTML = '<option value="">Все категории</option>'; 
+                    categories.forEach(cat => {
+                        const option = document.createElement('option');
+                        option.value = cat.category_id;
+                        option.textContent = cat.category_name;
+                        categoryFilter.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Не удалось загрузить категории:', error.message);
+                // alert('Не удалось загрузить категории: ' + error.message); 
+            }
+        }
+
+        function displayResults(networks) {
+            if (searchResults) {
+                searchResults.innerHTML = '';
+                
+                if (networks.length === 0) {
+                    searchResults.innerHTML = '<p>По вашему запросу ничего не найдено.</p>';
+                    return;
+                }
+
+                networks.forEach(nn => {
+                    const card = document.createElement('div');
+                    card.className = 'network-card';
+                    card.innerHTML = `
+                        <h3>${nn.name}</h3>
+                        <p><strong>Категория:</strong> ${nn.category_name}</p>
+                        <p>${nn.description.substring(0, 150)}...</p>
+                        <p><strong>Рейтинг:</strong> ${nn.rating} / 5.0</p>
+                        <a href="${nn.site_link}" target="_blank">Перейти на сайт</a>
+                    `;
+                    searchResults.appendChild(card);
                 });
             }
-        } catch (error) {
-            alert('Не удалось загрузить категории: ' + error.message);
         }
-    }
 
-    // 2. Отображение результатов поиска
-    function displayResults(networks) {
-        if (searchResults) {
-            searchResults.innerHTML = ''; // Очистка
+        async function handleSearch(event) {
+            // Предотвращаем стандартную отправку формы только если event существует
+            if (event && typeof event.preventDefault === 'function') {
+                event.preventDefault();
+            }
             
-            if (networks.length === 0) {
-                searchResults.innerHTML = '<p>По вашему запросу ничего не найдено.</p>';
-                return;
+            // Теперь безопасно читаем значения, так как мы проверили существование элементов
+            const searchText = searchForm ? searchForm.querySelector('input[name="search"]').value : '';
+            const categoryId = categoryFilter ? categoryFilter.value : '';
+
+            let endpoint = '/networks';
+            const params = new URLSearchParams();
+
+            if (categoryId) {
+                params.append('category_id', categoryId);
+            } else if (searchText) {
+                params.append('search', searchText);
             }
 
-            networks.forEach(nn => {
-                const card = document.createElement('div');
-                card.className = 'network-card';
-                card.innerHTML = `
-                    <h3>${nn.name}</h3>
-                    <p><strong>Категория:</strong> ${nn.category_name}</p>
-                    <p>${nn.description.substring(0, 150)}...</p>
-                    <p><strong>Рейтинг:</strong> ${nn.rating} / 5.0</p>
-                    <a href="${nn.site_link}" target="_blank">Перейти на сайт</a>
-                    `;
-                searchResults.appendChild(card);
-            });
-        }
-    }
+            if (params.toString()) {
+                endpoint += `?${params.toString()}`;
+            }
 
-    // 3. Обработка формы поиска и фильтрации
-    async function handleSearch(event) {
-        event.preventDefault();
+            try {
+                const networks = await fetchData(endpoint);
+                displayResults(networks);
+            } catch (error) {
+                displayResults([]); 
+                // Ошибки будут видны в консоли из fetchData, тут можно не дублировать alert
+            }
+        }
         
-        const searchText = searchForm.querySelector('input[name="search"]').value;
-        const categoryId = categoryFilter.value;
-
-        let endpoint = '/networks';
-        const params = new URLSearchParams();
-
-        if (categoryId) {
-            params.append('category_id', categoryId);
-        } else if (searchText) {
-            params.append('search', searchText);
+        // --- Добавление слушателей для главной страницы ---
+        if (searchForm) {
+            searchForm.addEventListener('submit', handleSearch);
+        }
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', handleSearch); 
         }
 
-        if (params.toString()) {
-            endpoint += `?${params.toString()}`;
-        }
-
-        try {
-            const networks = await fetchData(endpoint);
-            displayResults(networks);
-        } catch (error) {
-            displayResults([]); // Показываем пустой результат при ошибке
-            alert('Ошибка при выполнении поиска: ' + error.message);
-        }
-    }
-    
-    // --- Инициализация слушателей ---
-    if (searchForm) {
-        searchForm.addEventListener('submit', handleSearch);
-    }
-    if (categoryFilter) {
-         // Перезапускаем поиск при смене категории
-        categoryFilter.addEventListener('change', handleSearch); 
+        // Запуск начальной загрузки
+        loadCategories(); 
+        handleSearch(null); // Загружаем все сети при старте
     }
 
-    // Загружаем категории и все нейросети при старте
-    loadCategories(); 
-    // Загружаем все сети при старте (пустой вызов поиска)
-    handleSearch({ preventDefault: () => {} }); 
-});
+    // --- СТРАНИЦА ЛОГИНА ---
 
-// --- Логика для страниц Login/Register (Пример) ---
-
-// *********** ЛОГИН ************
-const loginForm = document.getElementById('login-form');
-if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const email = loginForm.querySelector('#email').value;
-        const password = loginForm.querySelector('#password').value;
-
-        try {
-            const result = await fetchData('/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) { // Проверяем, что мы на странице login.html
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            // Если успех, сохраняем данные и перенаправляем
-            localStorage.setItem('user_id', result.user_id);
-            localStorage.setItem('username', result.username);
-            alert('Вход успешен! Добро пожаловать, ' + result.username);
-            window.location.href = 'personal_account.html'; // Перенаправление
+            const email = loginForm.querySelector('#email').value;
+            const password = loginForm.querySelector('#password').value;
 
-        } catch (error) {
-            alert('Ошибка входа: ' + error.message);
-        }
-    });
-}
+            try {
+                const result = await fetchData('/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                localStorage.setItem('user_id', result.user_id);
+                localStorage.setItem('username', result.username);
+                alert('Вход успешен! Добро пожаловать, ' + result.username);
+                window.location.href = 'personal_account.html';
 
-// *********** РЕГИСТРАЦИЯ ************
-const registerForm = document.getElementById('register-form');
-if (registerForm) {
-    registerForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const email = registerForm.querySelector('#email').value;
-        const password = registerForm.querySelector('#password').value;
-        const username = registerForm.querySelector('#username').value;
+            } catch (error) {
+                alert('Ошибка входа: ' + error.message);
+            }
+        });
+    }
 
-        try {
-            const result = await fetchData('/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, username })
-            });
+    // --- СТРАНИЦА РЕГИСТРАЦИИ ---
 
-            alert('Регистрация успешна! Ваш ID: ' + result.user_id);
-            window.location.href = 'login.html'; // Перенаправление на страницу входа
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) { // Проверяем, что мы на странице register.html
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = registerForm.querySelector('#email').value;
+            const password = registerForm.querySelector('#password').value;
+            const username = registerForm.querySelector('#username').value;
 
-        } catch (error) {
-            alert('Ошибка регистрации: ' + error.message);
-        }
-    });
-}
+            try {
+                const result = await fetchData('/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, username })
+                });
+
+                alert('Регистрация успешна! Ваш ID: ' + result.user_id);
+                window.location.href = 'login.html'; 
+
+            } catch (error) {
+                alert('Ошибка регистрации: ' + error.message);
+            }
+        });
+    }
+});
