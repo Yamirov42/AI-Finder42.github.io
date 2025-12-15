@@ -1,15 +1,6 @@
-// js/script.js
-
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // =================================================================================
-    // ВАЖНО: ЗАМЕНИТЕ ЭТОТ АДРЕС НА ВАШ ПУБЛИЧНЫЙ URL, ПРЕДОСТАВЛЕННЫЙ RENDER!
-    // (Например: https://ai-finder-api-du57.onrender.com/api/v1)
-    // =================================================================================
     const API_BASE_URL = 'https://ai-finder-api-du57.onrender.com/api/v1'; 
-    // ^^^ Убедитесь, что этот адрес правильный!
 
-    // --- Утилитарная функция для API ---
     async function fetchData(endpoint, options = {}) {
         const url = `${API_BASE_URL}${endpoint}`;
         try {
@@ -26,13 +17,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // --- ГЛАВНАЯ СТРАНИЦА (ПОИСК И КАТЕГОРИИ) ---
-    
     const searchForm = document.getElementById('search-form');
     const searchResults = document.getElementById('search-results');
     const categoryFilter = document.getElementById('category-filter');
     
-    // Проверяем, что мы на главной странице (или странице с поиском)
     if (searchForm || searchResults || categoryFilter) { 
 
         async function loadCategories() {
@@ -49,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 console.error('Не удалось загрузить категории:', error.message);
-                // alert('Не удалось загрузить категории: ' + error.message); 
+            
             }
         }
 
@@ -78,12 +66,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         async function handleSearch(event) {
-            // Предотвращаем стандартную отправку формы только если event существует
             if (event && typeof event.preventDefault === 'function') {
                 event.preventDefault();
             }
             
-            // Теперь безопасно читаем значения, так как мы проверили существование элементов
             const searchText = searchForm ? searchForm.querySelector('input[name="search"]').value : '';
             const categoryId = categoryFilter ? categoryFilter.value : '';
 
@@ -105,11 +91,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 displayResults(networks);
             } catch (error) {
                 displayResults([]); 
-                // Ошибки будут видны в консоли из fetchData, тут можно не дублировать alert
+       
             }
         }
         
-        // --- Добавление слушателей для главной страницы ---
+        
         if (searchForm) {
             searchForm.addEventListener('submit', handleSearch);
         }
@@ -117,12 +103,9 @@ document.addEventListener('DOMContentLoaded', function() {
             categoryFilter.addEventListener('change', handleSearch); 
         }
 
-        // Запуск начальной загрузки
         loadCategories(); 
-        handleSearch(null); // Загружаем все сети при старте
+        handleSearch(null); 
     }
-
-    // --- СТРАНИЦА ЛОГИНА ---
 
     const loginForm = document.getElementById('login-form');
     if (loginForm) { // Проверяем, что мы на странице login.html
@@ -149,8 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-
-    // --- СТРАНИЦА РЕГИСТРАЦИИ ---
 
     const registerForm = document.getElementById('register-form');
     if (registerForm) { // Проверяем, что мы на странице register.html
