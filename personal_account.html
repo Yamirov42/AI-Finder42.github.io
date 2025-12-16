@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI-Finder42 | Личный кабинет</title> 
+    <title>AI-Finder42 | Личный кабинет</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/neon.css">
 </head>
@@ -11,44 +11,27 @@
     <header class="neon-header">
         <div class="logo">AI-Finder<span>42</span></div>
         <nav>
-            <a href="index.html" class="neon-button">Главная</a>
-            <button id="logout-button" class="neon-button">Выход</button>
+            <a href="index.html" class="neon-button">На главную</a>
+            <button id="logout-btn" class="neon-button">Выйти</button>
         </nav>
     </header>
 
-    <main class="account-container">
-        <h1 class="neon-text" id="welcome-message">Добро пожаловать, Пользователь!</h1>
-        
-        <div class="tabs-container neon-box">
-            <div class="tabs-header">
-                <button class="tab-button active neon-button" data-tab="favorites">Избранные нейросети</button>
-                <button class="tab-button neon-button" data-tab="categories">Любимые категории</button>
-                <button class="tab-button neon-button" data-tab="history">История поиска</button>
-            </div>
+    <main class="search-container">
+        <h1 class="neon-text" id="welcome-user">Личный кабинет</h1>
 
-            <div class="tab-content" id="favorites">
-                <h2 class="neon-text">Ваши избранные нейросети</h2>
-                <div id="favorites-list" class="results-list">
-                    </div>
+        <section style="margin-top: 30px;">
+            <h2 class="neon-text">⭐ Избранные нейросети</h2>
+            <div id="fav-networks-list" class="results-container">
+                <p>Загрузка избранного...</p>
             </div>
+        </section>
 
-            <div class="tab-content hidden" id="categories">
-                <h2 class="neon-text">Ваши любимые категории</h2>
-                <div id="categories-list" class="results-list">
-                    </div>
-            </div>
-
-            <div class="tab-content hidden" id="history">
-                <h2 class="neon-text">Недавние запросы</h2>
-                <div id="history-list" class="results-list">
-                    </div>
-            </div>
-        </div>
+        <section style="margin-top: 50px;">
+            <h2 class="neon-text">❤️ Мои категории</h2>
+            <div id="fav-categories-list" class="results-container">
+                </div>
+        </section>
     </main>
-
-    <footer class="neon-footer">
-        <p>© 2025 AI-Finder42. Все права защищены.</p>
-    </footer>
 
     <script src="js/script.js"></script>
 </body>
