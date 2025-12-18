@@ -1,40 +1,37 @@
 document.addEventListener('DOMContentLoaded', function() {
     const API_BASE_URL = 'https://ai-finder-api-du57.onrender.com/api/v1'; 
-    const user_id = localStorage.getItem('user_id');
-    const username = localStorage.getItem('username');
+    const userId = localStorage.getItem('user_id');
+    const userName = localStorage.getItem('username');
 
-    // Навигация
+    // Навигация и приветствие
     const authLink = document.getElementById('auth-link');
     const personalAccountLink = document.getElementById('personal-account-link');
-    if (username && authLink && personalAccountLink) {
+    const welcomeTitle = document.getElementById('welcome-user');
+
+    if (userName && authLink && personalAccountLink) {
         authLink.style.display = 'none';
         personalAccountLink.style.display = 'inline-block';
-        personalAccountLink.textContent = `ЛК (${username})`;
+        personalAccountLink.textContent = `ЛК (${userName})`;
     }
-
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            localStorage.clear();
-            window.location.href = 'index.html';
-        });
-    }
+    if (welcomeTitle && userName) welcomeTitle.textContent = `Привет, ${userName}!`;
 
     async function fetchData(endpoint, options = {}) {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-        if (!response.ok) throw new Error('Ошибка API');
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.error || 'Ошибка сервера');
+        }
         return response.status === 204 ? null : await response.json();
     }
 
-    // --- ГЛАВНАЯ СТРАНИЦА ---
+    // --- ГЛАВНАЯ СТРАНИЦА: ПОИСК ---
     const searchForm = document.getElementById('search-form');
     const searchResults = document.getElementById('search-results');
     const categoryFilter = document.getElementById('category-filter');
-    const saveCatBtn = document.getElementById('save-category-btn');
 
     if (searchForm) {
-        async function loadCategories() {
-            const categories = await fetchData('/categories');
+        // Загрузка категорий
+        fetchData('/categories').then(categories => {
             categoryFilter.innerHTML = '<option value="">Все категории</option>';
             categories.forEach(cat => {
                 const opt = document.createElement('option');
@@ -42,9 +39,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 opt.textContent = cat.category_name;
                 categoryFilter.appendChild(opt);
             });
-        }
+        }).catch(e => console.error('Ошибка загрузки категорий', e));
 
-        function displayResults(networks) {
+        // Поиск
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const searchText = searchForm.querySelector('input[name="search"]').value;
+            const catId = categoryFilter.value;
+            if (!searchText && !catId) return;
+
+            try {
+                const data = await fetchData(`/networks?category_id=${catId}&search=${searchText}`);
+                renderNetworks(data);
+            } catch (err) { console.error(err); }
+        });
+
+        function renderNetworks(networks) {
             searchResults.innerHTML = '';
             if (!networks.length) {
                 searchResults.innerHTML = '<p class="neon-text">Ничего не найдено.</p>';
@@ -55,75 +65,126 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.className = 'network-card neon-box';
                 card.innerHTML = `
                     <h3 class="neon-text">${nn.name}</h3>
+                    <p class="category-tag">${nn.category_name}</p>
                     <p>${nn.description}</p>
-                    <button class="neon-button fav-net-btn" data-id="${nn.neuro_id}">⭐ В избранное</button>
-                    <a href="${nn.site_link}" target="_blank" class="neon-link">Сайт</a>`;
+                    <div class="card-actions">
+                        <button class="neon-button fav-btn" data-id="${nn.neuro_id}">⭐ В избранное</button>
+                        <a href="${nn.site_link}" target="_blank" class="neon-link">Сайт</a>
+                    </div>`;
                 searchResults.appendChild(card);
             });
 
-            document.querySelectorAll('.fav-net-btn').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    if (!user_id) return alert('Войдите!');
-                    await fetchData('/favorites/networks', {
+            // Кнопки избранного
+            document.querySelectorAll('.fav-btn').forEach(btn => {
+                btn.onclick = async (e) => {
+                    if (!userId) return alert('Войдите в аккаунт!');
+                    try {
+                        await fetchData('/favorites/networks', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ user_id: userId, neuro_id: e.target.dataset.id })
+                        });
+                        e.target.textContent = '❤️ Сохранено';
+                        e.target.disabled = true;
+                    } catch (err) { alert('Ошибка при сохранении: ' + err.message); }
+                };
+            });
+        }
+
+        // Кнопка сохранения категории
+        const saveCatBtn = document.getElementById('save-category-btn');
+        if (saveCatBtn) {
+            saveCatBtn.onclick = async () => {
+                if (!userId || !categoryFilter.value) return alert('Выберите категорию и войдите!');
+                try {
+                    await fetchData('/favorites/categories', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ user_id, neuro_id: e.target.dataset.id })
+                        body: JSON.stringify({ user_id: userId, category_id: categoryFilter.value })
                     });
-                    e.target.textContent = '❤️ Сохранено';
-                });
-            });
+                    alert('Категория сохранена!');
+                } catch (e) { alert(e.message); }
+            };
         }
-
-        searchForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const searchText = searchForm.querySelector('input[name="search"]').value;
-            const catId = categoryFilter.value;
-            if (!searchText && !catId) return;
-            const data = await fetchData(`/networks?category_id=${catId}&search=${searchText}`);
-            displayResults(data);
-        });
-
-        if (saveCatBtn) {
-            saveCatBtn.addEventListener('click', async () => {
-                if (!user_id || !categoryFilter.value) return alert('Выберите категорию и войдите!');
-                await fetchData('/favorites/categories', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ user_id, category_id: categoryFilter.value })
-                });
-                alert('Категория сохранена!');
-            });
-        }
-        loadCategories();
     }
 
     // --- ЛИЧНЫЙ КАБИНЕТ ---
     const favNetList = document.getElementById('fav-networks-list');
     const favCatList = document.getElementById('fav-categories-list');
 
-    if (favNetList && user_id) {
-        document.getElementById('welcome-user').textContent = `Привет, ${username}!`;
-        async function loadUserData() {
+    if (favNetList && userId) {
+        async function loadAccount() {
             try {
-                const nets = await fetchData(`/favorites/networks/${user_id}`);
-                favNetList.innerHTML = nets.length ? '' : '<p>Пусто</p>';
-                nets.forEach(nn => {
+                const nets = await fetchData(`/favorites/networks/${userId}`);
+                favNetList.innerHTML = nets.length ? '' : '<p>Нет избранных нейросетей</p>';
+                nets.forEach(n => {
                     const d = document.createElement('div');
                     d.className = 'neon-box'; d.style.padding = '10px'; d.style.marginBottom = '10px';
-                    d.innerHTML = `<h4 class="neon-text">${nn.name}</h4><p>${nn.category_name}</p>`;
+                    d.innerHTML = `<h4 class="neon-text" style="margin:0">${n.name}</h4><small>${n.category_name}</small>`;
                     favNetList.appendChild(d);
                 });
 
-                const cats = await fetchData(`/favorites/categories/${user_id}`);
-                favCatList.innerHTML = cats.length ? '' : '<p>Нет категорий</p>';
+                const cats = await fetchData(`/favorites/categories/${userId}`);
+                favCatList.innerHTML = cats.length ? '' : '<p>Нет сохраненных категорий</p>';
                 cats.forEach(c => {
                     const s = document.createElement('div');
                     s.className = 'neon-box'; s.style.display = 'inline-block'; s.style.margin = '5px';
                     s.innerHTML = `<span class="neon-text"># ${c.category_name}</span>`;
                     favCatList.appendChild(s);
                 });
-            } catch (e) { favNetList.innerHTML = '<p class="neon-text">Ошибка загрузки</p>'; }
+            } catch (e) { 
+                favNetList.innerHTML = '<p class="neon-text">Ошибка загрузки данных</p>';
+                console.error(e);
+            }
         }
-        loadUserData();
+        loadAccount();
+    }
+
+    // --- ФОРМЫ ВХОДА И РЕГИСТРАЦИИ ---
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const email = loginForm.querySelector('#email').value;
+            const password = loginForm.querySelector('#password').value;
+            try {
+                const res = await fetchData('/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, password })
+                });
+                localStorage.setItem('user_id', res.user_id);
+                localStorage.setItem('username', res.username);
+                window.location.href = 'index.html';
+            } catch (err) { alert('Ошибка: ' + err.message); }
+        };
+    }
+
+    const regForm = document.getElementById('register-form');
+    if (regForm) {
+        regForm.onsubmit = async (e) => {
+            e.preventDefault();
+            const email = regForm.querySelector('#email').value;
+            const username = regForm.querySelector('#username').value;
+            const password = regForm.querySelector('#password').value;
+            try {
+                await fetchData('/auth/register', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ email, username, password })
+                });
+                alert('Регистрация успешна!');
+                window.location.href = 'login.html';
+            } catch (err) { alert('Ошибка регистрации: ' + err.message); }
+        };
+    }
+
+    // Выход
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.onclick = () => {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        };
     }
 });
