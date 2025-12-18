@@ -122,3 +122,20 @@ footer {
 .hidden {
     display: none;
 }
+.category-tag {
+    font-size: 0.8em;
+    color: #00f2ff;
+    margin: 5px 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.fav-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: #ff0055;
+}
