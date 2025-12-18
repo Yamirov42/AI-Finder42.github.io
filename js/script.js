@@ -60,25 +60,67 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        function renderNetworks(networks) {
-            searchResults.innerHTML = '';
-            if (!networks.length) {
-                searchResults.innerHTML = '<p class="neon-text">Ничего не найдено.</p>';
-                return;
+       function renderNetworks(networks) {
+    searchResults.innerHTML = '';
+    if (!networks.length) {
+        searchResults.innerHTML = '<p class="neon-text">Ничего не найдено.</p>';
+        return;
+    }
+    
+    networks.forEach(nn => {
+        const card = document.createElement('div');
+        card.className = 'network-card neon-box';
+        // Округляем рейтинг для отображения
+        const displayRating = nn.average_rating ? parseFloat(nn.average_rating).toFixed(1) : "0.0";
+        
+        card.innerHTML = `
+            <div class="card-header">
+                <h3 class="neon-text">${nn.name}</h3>
+                <span class="rating-badge">⭐ ${displayRating}</span>
+            </div>
+            <p class="category-tag">${nn.category_name || 'Нейросеть'}</p>
+            <p class="price-tag">💰 ${nn.price_info || 'Бесплатно'}</p>
+            <p>${nn.description}</p>
+            
+            <div class="rating-select" data-id="${nn.neuro_id}">
+                <span>Оценить:</span>
+                <button class="rate-btn" data-val="1">1</button>
+                <button class="rate-btn" data-val="2">2</button>
+                <button class="rate-btn" data-val="3">3</button>
+                <button class="rate-btn" data-val="4">4</button>
+                <button class="rate-btn" data-val="5">5</button>
+            </div>
+
+            <div class="card-actions">
+                <button class="neon-button fav-btn" data-id="${nn.neuro_id}">⭐ В избранное</button>
+                <a href="${nn.site_link}" target="_blank" class="neon-link">Сайт</a>
+            </div>`;
+        searchResults.appendChild(card);
+    });
+
+    // Обработка клика по оценке
+    document.querySelectorAll('.rate-btn').forEach(btn => {
+        btn.onclick = async (e) => {
+            if (!userId) return alert('Войдите, чтобы ставить оценки!');
+            const neuroId = e.target.parentElement.dataset.id;
+            const ratingValue = e.target.dataset.val;
+
+            try {
+                const res = await fetchData(`/networks/${neuroId}/rate`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ user_id: userId, rating: ratingValue })
+                });
+                alert(`Ваша оценка (${ratingValue}) принята! Новый рейтинг: ${res.newAverage}`);
+                location.reload(); // Перезагружаем для обновления цифр
+            } catch (err) {
+                alert(err.message);
             }
-            networks.forEach(nn => {
-                const card = document.createElement('div');
-                card.className = 'network-card neon-box';
-                card.innerHTML = `
-                    <h3 class="neon-text">${nn.name}</h3>
-                    <p class="category-tag">${nn.category_name || 'Нейросеть'}</p>
-                    <p>${nn.description}</p>
-                    <div class="card-actions">
-                        <button class="neon-button fav-btn" data-id="${nn.neuro_id}">⭐ В избранное</button>
-                        <a href="${nn.site_link}" target="_blank" class="neon-link">Сайт</a>
-                    </div>`;
-                searchResults.appendChild(card);
-            });
+        };
+    });
+    
+    // (Код для кнопок избранного остается прежним)
+}
 
             // Логика кнопок "В избранное"
             document.querySelectorAll('.fav-btn').forEach(btn => {
