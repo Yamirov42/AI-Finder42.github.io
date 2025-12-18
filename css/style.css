@@ -139,3 +139,43 @@ footer {
     cursor: not-allowed;
     border-color: #ff0055;
 }
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rating-badge {
+    background: rgba(0, 242, 255, 0.1);
+    padding: 5px 10px;
+    border-radius: 15px;
+    border: 1px solid #00f2ff;
+    font-weight: bold;
+}
+
+.price-tag {
+    color: #ffde00;
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+.rating-select {
+    margin: 10px 0;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.rate-btn {
+    background: transparent;
+    border: 1px solid #555;
+    color: #fff;
+    cursor: pointer;
+    padding: 2px 8px;
+    transition: 0.3s;
+}
+
+.rate-btn:hover {
+    border-color: #00f2ff;
+    color: #00f2ff;
+}
